@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Tracking - AttendX</title>
+    <title>AttendX - Attendance Tracking</title>
 
     <style>
         * {
@@ -20,64 +20,54 @@
             padding: 30px;
         }
 
-        header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 40px;
-        }
-
-        h2, h3 {
-            color: #38d9c5;
-        }
-
-        a {
-            color: #38d9c5;
-            text-decoration: none;
-        }
-
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: auto;
         }
 
-        .box {
-            background: #151d33;
-            padding: 30px;
-            border-radius: 12px;
-            margin-top: 25px;
+        h1 {
+            color: #38d9c5;
+            text-align: center;
+            margin: 25px 0;
         }
 
-        h1 {
-            margin-bottom: 12px;
+        .card {
+            background: #151d33;
+            padding: 25px;
+            margin-top: 25px;
+            border-radius: 12px;
+            border: 1px solid #293653;
         }
 
         label {
             display: block;
-            margin: 18px 0 8px;
+            margin-top: 18px;
+            margin-bottom: 8px;
+            color: #38d9c5;
         }
 
         input, select {
             width: 100%;
             padding: 13px;
+            border: 1px solid #293653;
+            border-radius: 7px;
             background: #0b1020;
             color: white;
-            border: 1px solid #354361;
-            border-radius: 7px;
         }
 
         button {
-            margin-top: 20px;
-            padding: 13px 25px;
             background: #38d9c5;
+            color: #07111e;
+            padding: 13px 22px;
             border: none;
             border-radius: 7px;
-            font-weight: bold;
+            margin-top: 22px;
             cursor: pointer;
+            font-weight: bold;
         }
 
-        .message {
-            color: #38d9c5;
-            margin-top: 15px;
+        button:hover {
+            background: #20bba9;
         }
 
         table {
@@ -88,58 +78,64 @@
 
         th, td {
             padding: 13px;
+            border: 1px solid #293653;
             text-align: left;
-            border-bottom: 1px solid #354361;
         }
 
         th {
             color: #38d9c5;
         }
 
-        .table-wrap {
-            overflow-x: auto;
+        .message {
+            margin-top: 15px;
+            color: #38d9c5;
         }
 
         .percentage {
             color: #38d9c5;
             font-weight: bold;
         }
+
+        a {
+            color: #38d9c5;
+            text-decoration: none;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
     </style>
 </head>
 
 <body>
 
-<header>
-    <h2>AttendX</h2>
-    <a href="../index.html">← Back to Home</a>
-</header>
-
 <div class="container">
+
+    <a href="../index.html">← Back to Home</a>
 
     <h1>Attendance Tracking</h1>
 
-    <div class="box">
+    <div class="card">
 
-        <h3>Mark Attendance</h3>
+        <h2>Mark Student Attendance</h2>
 
         <form id="attendanceForm">
 
-            <label>Student ID</label>
-            <select id="studentId" required>
-                <option value="">Select Student</option>
+            <label for="student">Select Student</label>
+            <select id="student" required>
+                <option value="">Select a student</option>
             </select>
 
-            <label>Date</label>
+            <label for="date">Attendance Date</label>
             <input type="date" id="date" required>
 
-            <label>Attendance Status</label>
+            <label for="status">Attendance Status</label>
             <select id="status" required>
-                <option value="">Select Status</option>
                 <option value="Present">Present</option>
                 <option value="Absent">Absent</option>
             </select>
 
-            <button type="submit">Submit Attendance</button>
+            <button type="submit">Save Attendance</button>
 
         </form>
 
@@ -147,31 +143,32 @@
 
     </div>
 
-    <div class="box">
+    <div class="card">
 
-        <h3>Attendance Records</h3>
+        <h2>Attendance Records</h2>
 
-        <div class="table-wrap">
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
                         <th>Student ID</th>
+                        <th>Name</th>
                         <th>Date</th>
                         <th>Status</th>
                     </tr>
                 </thead>
 
-                <tbody id="attendanceList"></tbody>
+                <tbody id="attendanceTable"></tbody>
             </table>
         </div>
 
     </div>
 
-    <div class="box">
+    <div class="card">
 
-        <h3>Attendance Percentage</h3>
+        <h2>Attendance Percentage</h2>
 
-        <div class="table-wrap">
+        <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
@@ -183,7 +180,7 @@
                     </tr>
                 </thead>
 
-                <tbody id="percentageList"></tbody>
+                <tbody id="percentageTable"></tbody>
             </table>
         </div>
 
@@ -193,169 +190,194 @@
 
 <script>
 
-    let students = JSON.parse(
-        localStorage.getItem("attendxStudents")
-    ) || [];
+const STUDENTS_KEY = "attendxStudents";
+const ATTENDANCE_KEY = "attendxAttendance";
 
-    let attendance = JSON.parse(
-        localStorage.getItem("attendxAttendance")
-    ) || [];
+function getStudents() {
+    return JSON.parse(localStorage.getItem(STUDENTS_KEY) || "[]");
+}
 
-    const studentSelect = document.getElementById("studentId");
-    const attendanceList = document.getElementById("attendanceList");
-    const percentageList = document.getElementById("percentageList");
-    const message = document.getElementById("message");
+function getAttendance() {
+    return JSON.parse(localStorage.getItem(ATTENDANCE_KEY) || "[]");
+}
 
-    function loadStudents() {
+// Set today's date automatically
+document.getElementById("date").value =
+    new Date().toLocaleDateString("en-CA");
 
-        studentSelect.innerHTML =
-            '<option value="">Select Student</option>';
+// Load students into dropdown
+function loadStudents() {
 
-        students.forEach(student => {
+    const students = getStudents();
+    const dropdown = document.getElementById("student");
 
-            const option = document.createElement("option");
+    dropdown.innerHTML = '<option value="">Select a student</option>';
 
-            option.value = student.id;
-            option.textContent = student.id + " - " + student.name;
+    students.forEach(student => {
 
-            studentSelect.appendChild(option);
+        const option = document.createElement("option");
 
-        });
+        option.value = student.id;
+        option.textContent = student.id + " - " + student.name;
 
-        if (students.length === 0) {
-            message.textContent =
-                "Please add students in Student Records first.";
-        }
+        dropdown.appendChild(option);
 
+    });
+
+    if (students.length === 0) {
+        document.getElementById("message").textContent =
+            "Please add students in Student Records first.";
+    }
+}
+
+// Save attendance
+document.getElementById("attendanceForm")
+.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const studentId = document.getElementById("student").value;
+    const date = document.getElementById("date").value;
+    const status = document.getElementById("status").value;
+
+    if (!studentId || !date) {
+        document.getElementById("message").textContent =
+            "Please fill in all fields.";
+        return;
     }
 
-    function displayAttendance() {
+    const attendance = getAttendance();
 
-        attendanceList.innerHTML = "";
+    const alreadyExists = attendance.some(record =>
+        record.studentId === studentId &&
+        record.date === date
+    );
 
-        if (attendance.length === 0) {
-
-            attendanceList.innerHTML =
-                '<tr><td colspan="3">No attendance records yet.</td></tr>';
-
-        } else {
-
-            attendance.forEach(record => {
-
-                const row = document.createElement("tr");
-
-                [record.studentId, record.date, record.status]
-                    .forEach(value => {
-
-                        const cell = document.createElement("td");
-                        cell.textContent = value;
-                        row.appendChild(cell);
-
-                    });
-
-                attendanceList.appendChild(row);
-
-            });
-
-        }
-
-        displayPercentage();
-
+    if (alreadyExists) {
+        document.getElementById("message").textContent =
+            "Attendance already recorded for this student on this date.";
+        return;
     }
 
-    function displayPercentage() {
+    attendance.push({
+        studentId: studentId,
+        date: date,
+        status: status
+    });
 
-        percentageList.innerHTML = "";
+    localStorage.setItem(ATTENDANCE_KEY, JSON.stringify(attendance));
 
-        if (students.length === 0) {
-            percentageList.innerHTML =
-                '<tr><td colspan="5">No students available.</td></tr>';
-            return;
-        }
+    document.getElementById("message").textContent =
+        "Attendance saved successfully!";
 
-        students.forEach(student => {
+    document.getElementById("attendanceForm").reset();
 
-            const records = attendance.filter(
-                record => record.studentId === student.id
-            );
-
-            const total = records.length;
-
-            const present = records.filter(
-                record => record.status === "Present"
-            ).length;
-
-            const percentage = total === 0
-                ? 0
-                : (present / total * 100).toFixed(2);
-
-            const row = document.createElement("tr");
-
-            [
-                student.id,
-                student.name,
-                total,
-                present,
-                percentage + "%"
-            ].forEach(value => {
-
-                const cell = document.createElement("td");
-                cell.textContent = value;
-                row.appendChild(cell);
-
-            });
-
-            percentageList.appendChild(row);
-
-        });
-
-    }
-
-    document.getElementById("attendanceForm")
-        .addEventListener("submit", function(event) {
-
-            event.preventDefault();
-
-            const studentId = studentSelect.value;
-            const date = document.getElementById("date").value;
-            const status = document.getElementById("status").value;
-
-            const existing = attendance.find(record =>
-                record.studentId === studentId &&
-                record.date === date
-            );
-
-            if (existing) {
-
-                message.textContent =
-                    "Attendance already recorded for this date!";
-
-                return;
-
-            }
-
-            attendance.push({
-                studentId: studentId,
-                date: date,
-                status: status
-            });
-
-            localStorage.setItem(
-                "attendxAttendance",
-                JSON.stringify(attendance)
-            );
-
-            message.textContent =
-                "Attendance submitted successfully!";
-
-            this.reset();
-
-            displayAttendance();
-
-        });
+    document.getElementById("date").value =
+        new Date().toLocaleDateString("en-CA");
 
     loadStudents();
     displayAttendance();
+    displayPercentages();
+
+});
+
+// Display attendance records
+function displayAttendance() {
+
+    const students = getStudents();
+    const attendance = getAttendance();
+
+    const table = document.getElementById("attendanceTable");
+
+    table.innerHTML = "";
+
+    attendance.forEach(record => {
+
+        const student = students.find(
+            item => item.id === record.studentId
+        );
+
+        const row = document.createElement("tr");
+
+        const values = [
+            record.studentId,
+            student ? student.name : "Unknown",
+            record.date,
+            record.status
+        ];
+
+        values.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+
+    });
+
+}
+
+// Calculate attendance percentage
+function displayPercentages() {
+
+    const students = getStudents();
+    const attendance = getAttendance();
+
+    const table = document.getElementById("percentageTable");
+
+    table.innerHTML = "";
+
+    students.forEach(student => {
+
+        const records = attendance.filter(
+            item => item.studentId === student.id
+        );
+
+        const total = records.length;
+
+        const present = records.filter(
+            item => item.status === "Present"
+        ).length;
+
+        const percentage = total > 0
+            ? (present / total) * 100
+            : 0;
+
+        const row = document.createElement("tr");
+
+        const values = [
+            student.id,
+            student.name,
+            total,
+            present,
+            percentage.toFixed(2) + "%"
+        ];
+
+        values.forEach((value, index) => {
+
+            const cell = document.createElement("td");
+
+            cell.textContent = value;
+
+            if (index === 4) {
+                cell.className = "percentage";
+            }
+
+            row.appendChild(cell);
+
+        });
+
+        table.appendChild(row);
+
+    });
+
+}
+
+// Initial page loading
+loadStudents();
+displayAttendance();
+displayPercentages();
 
 </script>
 
