@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendX - Sorting Algorithms</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0b1020;
+            color: white;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #38d9c5;
+            text-align: center;
+        }
+
+        .card {
+            background: #151d33;
+            padding: 25px;
+            margin-top: 25px;
+            border-radius: 12px;
+            border: 1px solid #293653;
+        }
+
+        p {
+            color: #b8c2d9;
+            line-height: 1.7;
+        }
+
+        button {
+            background: #38d9c5;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .result {
+            margin-top: 20px;
+            color: #38d9c5;
+            line-height: 2;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #293653;
+            text-align: left;
+        }
+
+        th {
+            color: #38d9c5;
+        }
+
+        a {
+            color: #38d9c5;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <p><a href="../index.html">← Back to Home</a></p>
+
+    <h1>Sorting Algorithms</h1>
+
+    <p style="text-align:center;">
+        Sort student records according to attendance percentage.
+    </p>
+
+    <div class="card">
+        <h2>1. Bubble Sort</h2>
+        <p>
+            Bubble Sort compares two adjacent values and swaps them
+            when they are in the wrong order.
+        </p>
+        <p><b>Time Complexity:</b> O(n²)</p>
+
+        <button onclick="runBubbleSort()">Run Bubble Sort</button>
+
+        <div class="result" id="bubbleResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>2. Merge Sort</h2>
+        <p>
+            Merge Sort divides the records into smaller parts,
+            sorts them and merges them together.
+        </p>
+        <p><b>Time Complexity:</b> O(n log n)</p>
+
+        <button onclick="runMergeSort()">Run Merge Sort</button>
+
+        <div class="result" id="mergeResult"></div>
+    </div>
+
+</div>
+
+<script>
+
+function getStudentRecords() {
+    const students = JSON.parse(
+        localStorage.getItem("attendxStudents") || "[]"
+    );
+
+    const attendance = JSON.parse(
+        localStorage.getItem("attendxAttendance") || "[]"
+    );
+
+    return students.map(student => {
+        const records = attendance.filter(
+            item => item.studentId === student.id
+        );
+
+        const present = records.filter(
+            item => item.status === "Present"
+        ).length;
+
+        const percentage = records.length > 0
+            ? (present / records.length) * 100
+            : 0;
+
+        return {
+            id: student.id,
+            name: student.name,
+            department: student.department,
+            percentage: percentage
+        };
+    });
+}
+
+function displayRecords(records, elementId, steps) {
+    let html = `<p>Sorting steps: ${steps}</p>`;
+
+    if (records.length === 0) {
+        html += "<p>No student records found. Add students first.</p>";
+    } else {
+        html += `
+            <table>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Attendance</th>
+                </tr>
+        `;
+
+        records.forEach(student => {
+            html += `
+                <tr>
+                    <td>${student.id}</td>
+                    <td>${student.name}</td>
+                    <td>${student.department}</td>
+                    <td>${student.percentage.toFixed(2)}%</td>
+                </tr>
+            `;
+        });
+
+        html += "</table>";
+    }
+
+    document.getElementById(elementId).innerHTML = html;
+}
+
+function runBubbleSort() {
+    let records = getStudentRecords();
+    let steps = 0;
+
+    for (let i = 0; i < records.length - 1; i++) {
+        for (let j = 0; j < records.length - i - 1; j++) {
+            steps++;
+
+            if (records[j].percentage < records[j + 1].percentage) {
+                let temp = records[j];
+                records[j] = records[j + 1];
+                records[j + 1] = temp;
+            }
+        }
+    }
+
+    displayRecords(records, "bubbleResult", steps);
+}
+
+function mergeSort(records, count) {
+    if (records.length <= 1) {
+        return records;
+    }
+
+    const middle = Math.floor(records.length / 2);
+
+    const left = mergeSort(records.slice(0, middle), count);
+    const right = mergeSort(records.slice(middle), count);
+
+    return merge(left, right, count);
+}
+
+function merge(left, right, count) {
+    let result = [];
+
+    while (left.length && right.length) {
+        count.steps++;
+
+        if (left[0].percentage >= right[0].percentage) {
+            result.push(left.shift());
+        } else {
+            result.push(right.shift());
+        }
+    }
+
+    return result.concat(left, right);
+}
+
+function runMergeSort() {
+    let records = getStudentRecords();
+    let count = { steps: 0 };
+
+    let sortedRecords = mergeSort(records, count);
+
+    displayRecords(sortedRecords, "mergeResult", count.steps);
+}
+
+</script>
+
+</body>
+</html>

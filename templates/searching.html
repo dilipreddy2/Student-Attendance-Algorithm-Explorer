@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AttendX - Searching Algorithms</title>
+    <style>
+        * { box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #0b1020; color: white; padding: 30px; }
+        .container { max-width: 900px; margin: auto; }
+        h1 { color: #38d9c5; text-align: center; }
+        .card { background: #151d33; padding: 25px; margin-top: 25px; border-radius: 12px; }
+        p { color: #b8c2d9; line-height: 1.7; }
+        input, button { padding: 12px; margin-top: 12px; border: none; border-radius: 6px; }
+        input { width: 100%; }
+        button { background: #38d9c5; cursor: pointer; font-weight: bold; }
+        .result { color: #38d9c5; margin-top: 15px; }
+        a { color: #38d9c5; text-decoration: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <p><a href="../index.html">← Back to Home</a></p>
+    <h1>Searching Algorithms</h1>
+    <p style="text-align:center;">Learn how searching algorithms find student records.</p>
+
+    <div class="card">
+        <h2>1. Linear Search</h2>
+        <p>Linear Search checks each student ID one by one until it finds the target.</p>
+        <p><b>Time Complexity:</b> O(n)</p>
+        <input id="linearID" placeholder="Enter Student ID">
+        <button onclick="linearSearch()">Run Linear Search</button>
+        <div class="result" id="linearResult"></div>
+    </div>
+
+    <div class="card">
+        <h2>2. Binary Search</h2>
+        <p>Binary Search repeatedly divides a sorted list into two halves.</p>
+        <p><b>Time Complexity:</b> O(log n), when the list is sorted.</p>
+        <input id="binaryID" placeholder="Enter Student ID">
+        <button onclick="binarySearch()">Run Binary Search</button>
+        <div class="result" id="binaryResult"></div>
+    </div>
+</div>
+
+<script>
+function getStudents() {
+    return JSON.parse(localStorage.getItem("attendxStudents") || "[]");
+}
+
+function linearSearch() {
+    const id = document.getElementById("linearID").value.trim().toLowerCase();
+    const students = getStudents();
+    let steps = 0;
+    let found = null;
+
+    for (const student of students) {
+        steps++;
+        if (student.id.toLowerCase() === id) {
+            found = student;
+            break;
+        }
+    }
+
+    document.getElementById("linearResult").textContent =
+        found ? `Found: ${found.name} | Steps: ${steps}` :
+        `Student not found | Steps: ${steps}`;
+}
+
+function binarySearch() {
+    const id = document.getElementById("binaryID").value.trim().toLowerCase();
+    const students = getStudents().sort((a, b) =>
+        a.id.toLowerCase().localeCompare(b.id.toLowerCase())
+    );
+
+    let low = 0, high = students.length - 1, steps = 0;
+    let found = null;
+
+    while (low <= high) {
+        steps++;
+        const mid = Math.floor((low + high) / 2);
+        const current = students[mid].id.toLowerCase();
+
+        if (current === id) {
+            found = students[mid];
+            break;
+        } else if (current < id) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    document.getElementById("binaryResult").textContent =
+        found ? `Found: ${found.name} | Steps: ${steps}` :
+        `Student not found | Steps: ${steps}`;
+}
+</script>
+</body>
+</html>
