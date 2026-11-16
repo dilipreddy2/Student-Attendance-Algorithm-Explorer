@@ -128,6 +128,10 @@
             color: #f0c674;
             margin-top: 12px;
         }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
     </style>
 </head>
 
@@ -135,7 +139,7 @@
 
 <header>
     <h2>AttendX</h2>
-    <a href="/">← Back to Home</a>
+    <a href="../index.html">← Back to Home</a>
 </header>
 
 <div class="container">
@@ -177,123 +181,332 @@
 
         <h3>Run an Algorithm</h3>
 
-        <form method="POST">
+        <label>Select Algorithm</label>
 
-            <label>Select Algorithm</label>
+        <select id="algorithm">
+            <option value="">Choose an algorithm</option>
+            <option value="linear">Linear Search</option>
+            <option value="binary">Binary Search</option>
+            <option value="bubble">Bubble Sort</option>
+            <option value="merge">Merge Sort</option>
+        </select>
 
-            <select name="algorithm" id="algorithm" required>
-                <option value="">Choose an algorithm</option>
-                <option value="linear">Linear Search</option>
-                <option value="binary">Binary Search</option>
-                <option value="bubble">Bubble Sort</option>
-                <option value="merge">Merge Sort</option>
-            </select>
+        <label>Student ID (only for searching)</label>
 
-            <label>Student ID (only for searching)</label>
+        <input
+            type="text"
+            id="student_id"
+            placeholder="Example: STU101"
+        >
 
-            <input
-                type="text"
-                name="student_id"
-                id="student_id"
-                placeholder="Example: STU101"
-            >
+        <p class="note">
+            Enter a Student ID for Linear Search or Binary Search.
+            Sorting algorithms use all student records.
+        </p>
 
-            <p class="note">
-                Enter a Student ID for Linear Search or Binary Search.
-                Sorting algorithms use all student records.
-            </p>
+        <button onclick="runAlgorithm()">Run Algorithm</button>
 
-            <button type="submit">Run Algorithm</button>
-
-        </form>
+        <p id="message" class="complexity"></p>
 
     </div>
 
-    {% if result is not none %}
-
-    <div class="box">
+    <div class="box" id="resultBox" style="display:none;">
 
         <h3>Algorithm Result</h3>
 
-        <p class="complexity">{{ complexity }}</p>
+        <p class="complexity" id="complexity"></p>
 
-        {% if result is mapping %}
-
-            <h3 style="margin-top:20px;">Student Found!</h3>
-
+        <div class="table-wrap">
             <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Attendance</th>
-                </tr>
-
-                <tr>
-                    <td>{{ result.id }}</td>
-                    <td>{{ result.name }}</td>
-                    <td>{{ result.department }}</td>
-                    <td>{{ result.percentage }}%</td>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Attendance</th>
+                    </tr>
+                </thead>
+                <tbody id="resultList"></tbody>
             </table>
-
-        {% elif result is sequence and result is not string %}
-
-            <h3 style="margin-top:20px;">Sorted Student Records</h3>
-
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Department</th>
-                    <th>Attendance</th>
-                </tr>
-
-                {% for student in result %}
-                <tr>
-                    <td>{{ student.id }}</td>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.department }}</td>
-                    <td>{{ student.percentage }}%</td>
-                </tr>
-                {% endfor %}
-
-            </table>
-
-        {% else %}
-
-            <p>Student not found. Please check the Student ID.</p>
-
-        {% endif %}
+        </div>
 
         <h3 style="margin-top:25px;">Step-by-Step Explanation</h3>
 
-        <ol class="steps">
-            {% for step in steps %}
-                <li>{{ step }}</li>
-            {% else %}
-                <li>No steps available.</li>
-            {% endfor %}
-        </ol>
+        <ol class="steps" id="steps"></ol>
 
     </div>
-
-    {% endif %}
 
 </div>
 
 <script>
-    const algorithm = document.getElementById("algorithm");
-    const studentId = document.getElementById("student_id");
 
-    function updateStudentId() {
-        studentId.required =
-            algorithm.value === "linear" ||
-            algorithm.value === "binary";
+    const students = JSON.parse(
+        localStorage.getItem("attendxStudents")
+    ) || [];
+
+    const attendance = JSON.parse(
+        localStorage.getItem("attendxAttendance")
+    ) || [];
+
+    function getStudentData() {
+
+        return students.map(student => {
+
+            const records = attendance.filter(
+                record => record.studentId === student.id
+            );
+
+            const present = records.filter(
+                record => record.status === "Present"
+            ).length;
+
+            const percentage = records.length === 0
+                ? 0
+                : (present / records.length * 100);
+
+            return {
+                ...student,
+                percentage: Number(percentage.toFixed(2))
+            };
+
+        });
+
     }
 
-    algorithm.addEventListener("change", updateStudentId);
-    updateStudentId();
+    function runAlgorithm() {
+
+        const algorithm = document.getElementById("algorithm").value;
+        const studentId = document.getElementById("student_id").value.trim().toLowerCase();
+
+        const message = document.getElementById("message");
+        const resultBox = document.getElementById("resultBox");
+        const resultList = document.getElementById("resultList");
+        const stepsList = document.getElementById("steps");
+        const complexity = document.getElementById("complexity");
+
+        resultList.innerHTML = "";
+        stepsList.innerHTML = "";
+        resultBox.style.display = "none";
+        message.textContent = "";
+
+        if (!algorithm) {
+            message.textContent = "Please select an algorithm.";
+            return;
+        }
+
+        if (students.length === 0) {
+            message.textContent = "Please add students first.";
+            return;
+        }
+
+        if ((algorithm === "linear" || algorithm === "binary") && !studentId) {
+            message.textContent = "Please enter a Student ID.";
+            return;
+        }
+
+        let data = getStudentData();
+        let result = [];
+        let steps = [];
+
+        if (algorithm === "linear") {
+
+            let found = null;
+
+            steps.push("Start searching from the first student.");
+
+            for (let i = 0; i < data.length; i++) {
+
+                steps.push("Checking student " + data[i].id);
+
+                if (data[i].id.toLowerCase() === studentId) {
+                    found = data[i];
+                    steps.push("Student found at position " + (i + 1));
+                    break;
+                }
+
+            }
+
+            if (found) {
+                result = [found];
+                complexity.textContent = "Time Complexity: O(n) | Space Complexity: O(1)";
+            } else {
+                steps.push("Student ID not found.");
+                complexity.textContent = "Time Complexity: O(n) | Space Complexity: O(1)";
+            }
+
+        }
+
+        else if (algorithm === "binary") {
+
+            let sorted = [...data].sort((a, b) =>
+                a.id.localeCompare(b.id, undefined, { numeric: true })
+            );
+
+            let low = 0;
+            let high = sorted.length - 1;
+            let found = null;
+
+            steps.push("Sort student IDs before starting Binary Search.");
+            steps.push("Set low = 0 and high = " + high);
+
+            while (low <= high) {
+
+                let mid = Math.floor((low + high) / 2);
+
+                steps.push("Check middle student: " + sorted[mid].id);
+
+                let comparison = sorted[mid].id.toLowerCase();
+
+                if (comparison === studentId) {
+
+                    found = sorted[mid];
+                    steps.push("Student found!");
+                    break;
+
+                } else if (comparison < studentId) {
+
+                    steps.push("Target is greater. Search right half.");
+                    low = mid + 1;
+
+                } else {
+
+                    steps.push("Target is smaller. Search left half.");
+                    high = mid - 1;
+
+                }
+
+            }
+
+            if (found) {
+                result = [found];
+                complexity.textContent = "Search: O(log n) | Pre-sorting: O(n log n)";
+            } else {
+                steps.push("Student ID not found.");
+                complexity.textContent = "Search: O(log n) | Pre-sorting: O(n log n)";
+            }
+
+        }
+
+        else if (algorithm === "bubble") {
+
+            result = [...data];
+
+            steps.push("Start Bubble Sort using attendance percentage.");
+            steps.push("Compare neighboring student percentages.");
+
+            for (let i = 0; i < result.length - 1; i++) {
+
+                for (let j = 0; j < result.length - i - 1; j++) {
+
+                    steps.push(
+                        "Compare " + result[j].id + " (" + result[j].percentage +
+                        "%) and " + result[j + 1].id + " (" +
+                        result[j + 1].percentage + "%)"
+                    );
+
+                    if (result[j].percentage > result[j + 1].percentage) {
+
+                        let temp = result[j];
+                        result[j] = result[j + 1];
+                        result[j + 1] = temp;
+
+                        steps.push("Swap the two students.");
+
+                    }
+
+                }
+
+            }
+
+            steps.push("Bubble Sort completed.");
+
+            complexity.textContent = "Time Complexity: O(n²) | Space Complexity: O(1)";
+
+        }
+
+        else if (algorithm === "merge") {
+
+            steps.push("Start Merge Sort using attendance percentage.");
+
+            function mergeSort(arr) {
+
+                if (arr.length <= 1) {
+                    return arr;
+                }
+
+                let mid = Math.floor(arr.length / 2);
+
+                steps.push("Divide the list into two halves.");
+
+                let left = mergeSort(arr.slice(0, mid));
+                let right = mergeSort(arr.slice(mid));
+
+                let merged = [];
+                let i = 0;
+                let j = 0;
+
+                while (i < left.length && j < right.length) {
+
+                    if (left[i].percentage <= right[j].percentage) {
+                        merged.push(left[i]);
+                        i++;
+                    } else {
+                        merged.push(right[j]);
+                        j++;
+                    }
+
+                }
+
+                return merged.concat(left.slice(i), right.slice(j));
+
+            }
+
+            result = mergeSort(data);
+
+            steps.push("Merge the sorted halves.");
+            steps.push("Merge Sort completed.");
+
+            complexity.textContent = "Time Complexity: O(n log n) | Space Complexity: O(n)";
+
+        }
+
+        result.forEach(student => {
+
+            const row = document.createElement("tr");
+
+            [
+                student.id,
+                student.name,
+                student.department,
+                student.percentage + "%"
+            ].forEach(value => {
+
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+
+            });
+
+            resultList.appendChild(row);
+
+        });
+
+        steps.forEach(step => {
+
+            const li = document.createElement("li");
+            li.textContent = step;
+            stepsList.appendChild(li);
+
+        });
+
+        resultBox.style.display = "block";
+
+        if (result.length === 0 && algorithm !== "linear" && algorithm !== "binary") {
+            message.textContent = "No results available.";
+        }
+
+    }
+
 </script>
 
 </body>

@@ -1,36 +1,39 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Attendance Algorithm Explorer</title>
+    <title>AttendX - Student Attendance Algorithm Explorer</title>
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #0f172a;
+            background: #0b1020;
             color: white;
             padding: 30px;
         }
 
         header {
             text-align: center;
-            padding: 45px 15px;
+            padding: 45px 10px;
         }
 
         header h1 {
-            color: #38bdf8;
-            font-size: 32px;
+            color: #38d9c5;
+            font-size: 36px;
             margin-bottom: 15px;
         }
 
         header p {
-            color: #cbd5e1;
+            color: #b8c2d9;
+            line-height: 1.7;
         }
 
         .container {
@@ -46,20 +49,37 @@
         }
 
         .card {
-            background: #1e293b;
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid #334155;
+            background: #151d33;
+            padding: 30px;
+            border: 1px solid #293653;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #38d9c5;
         }
 
         .card h2 {
-            color: #38bdf8;
-            margin-bottom: 12px;
+            color: #38d9c5;
+            margin-bottom: 15px;
         }
 
         .card p {
-            color: #cbd5e1;
-            line-height: 1.6;
+            color: #b8c2d9;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .card a {
+            display: inline-block;
+            background: #38d9c5;
+            color: #07111e;
+            padding: 12px 20px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: bold;
         }
 
         footer {
@@ -69,40 +89,51 @@
         }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <header>
-            <h1>Student Attendance Algorithm Explorer</h1>
-            <p>Manage student records, track attendance and explore algorithms.</p>
-        </header>
+<div class="container">
 
-        <section class="cards">
-            <div class="card">
-                <h2>Student Records</h2>
-                <p>Add, view and manage student information.</p>
-            </div>
+    <header>
+        <h1>AttendX</h1>
+        <p>Student Attendance Algorithm Explorer</p>
+        <p>Manage student records, track attendance and explore searching and sorting algorithms.</p>
+    </header>
 
-            <div class="card">
-                <h2>Attendance Tracking</h2>
-                <p>Record attendance and calculate attendance percentages.</p>
-            </div>
+    <section class="cards">
 
-            <div class="card">
-                <h2>Searching Algorithms</h2>
-                <p>Explore Linear Search and Binary Search.</p>
-            </div>
+        <div class="card">
+            <h2>Student Records</h2>
+            <p>Add, view and delete student information.</p>
+            <a href="templates/students.html">Open Students</a>
+        </div>
 
-            <div class="card">
-                <h2>Sorting Algorithms</h2>
-                <p>Understand Bubble Sort and Merge Sort step by step.</p>
-            </div>
-        </section>
+        <div class="card">
+            <h2>Attendance Tracking</h2>
+            <p>Mark attendance and calculate student attendance percentages.</p>
+            <a href="templates/attendance.html">Open Attendance</a>
+        </div>
 
-        <footer>
-            <p>Student Attendance Algorithm Explorer | Web Development Project</p>
-        </footer>
-    </div>
+        <div class="card">
+            <h2>Searching Algorithms</h2>
+            <p>Explore Linear Search and Binary Search step by step.</p>
+            <a href="templates/explorer.html">Explore Algorithms</a>
+        </div>
+
+        <div class="card">
+            <h2>Sorting Algorithms</h2>
+            <p>Understand Bubble Sort and Merge Sort using student records.</p>
+            <a href="templates/explorer.html">Explore Sorting</a>
+        </div>
+
+    </section>
+
+    <footer>
+        <p>AttendX | Student Attendance Algorithm Explorer</p>
+        <p>Web Development Capstone Project</p>
+    </footer>
+
+</div>
 
 </body>
 </html>

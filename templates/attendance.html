@@ -26,7 +26,7 @@
             margin-bottom: 40px;
         }
 
-        header h2, h3 {
+        h2, h3 {
             color: #38d9c5;
         }
 
@@ -36,7 +36,7 @@
         }
 
         .container {
-            max-width: 850px;
+            max-width: 900px;
             margin: auto;
         }
 
@@ -66,7 +66,7 @@
         }
 
         button {
-            margin-top: 25px;
+            margin-top: 20px;
             padding: 13px 25px;
             background: #38d9c5;
             border: none;
@@ -95,81 +95,269 @@
         th {
             color: #38d9c5;
         }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        .percentage {
+            color: #38d9c5;
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
 
-    <header>
-        <h2>AttendX</h2>
-        <a href="/">← Back to Home</a>
-    </header>
+<header>
+    <h2>AttendX</h2>
+    <a href="../index.html">← Back to Home</a>
+</header>
 
-    <div class="container">
+<div class="container">
 
-        <h1>Attendance Tracking</h1>
+    <h1>Attendance Tracking</h1>
 
-        <div class="box">
+    <div class="box">
 
-            <h3>Mark Attendance</h3>
+        <h3>Mark Attendance</h3>
 
-            <form method="POST">
+        <form id="attendanceForm">
 
-                <label>Student ID</label>
+            <label>Student ID</label>
+            <select id="studentId" required>
+                <option value="">Select Student</option>
+            </select>
 
-                <select name="student_id" required>
-                    <option value="">Select Student</option>
+            <label>Date</label>
+            <input type="date" id="date" required>
 
-                    {% for student in students %}
-                    <option value="{{ student['id'] }}">
-                        {{ student['id'] }} - {{ student['name'] }}
-                    </option>
-                    {% endfor %}
+            <label>Attendance Status</label>
+            <select id="status" required>
+                <option value="">Select Status</option>
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+            </select>
 
-                </select>
+            <button type="submit">Submit Attendance</button>
 
-                <label>Date</label>
-                <input type="date" name="date" required>
+        </form>
 
-                <label>Attendance Status</label>
+        <p class="message" id="message"></p>
 
-                <select name="status" required>
-                    <option value="">Select Status</option>
-                    <option value="Present">Present</option>
-                    <option value="Absent">Absent</option>
-                </select>
+    </div>
 
-                <button type="submit">Submit Attendance</button>
+    <div class="box">
 
-            </form>
+        <h3>Attendance Records</h3>
 
-            <p class="message">{{ message }}</p>
-
-            <h3 style="margin-top:30px;">Attendance Records</h3>
-
+        <div class="table-wrap">
             <table>
-                <tr>
-                    <th>Student ID</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
 
-                {% for record in records %}
-                <tr>
-                    <td>{{ record['student_id'] }}</td>
-                    <td>{{ record['date'] }}</td>
-                    <td>{{ record['status'] }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="3">No attendance records yet.</td>
-                </tr>
-                {% endfor %}
+                <tbody id="attendanceList"></tbody>
             </table>
-
         </div>
 
     </div>
+
+    <div class="box">
+
+        <h3>Attendance Percentage</h3>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Total Classes</th>
+                        <th>Present</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+
+                <tbody id="percentageList"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    let students = JSON.parse(
+        localStorage.getItem("attendxStudents")
+    ) || [];
+
+    let attendance = JSON.parse(
+        localStorage.getItem("attendxAttendance")
+    ) || [];
+
+    const studentSelect = document.getElementById("studentId");
+    const attendanceList = document.getElementById("attendanceList");
+    const percentageList = document.getElementById("percentageList");
+    const message = document.getElementById("message");
+
+    function loadStudents() {
+
+        studentSelect.innerHTML =
+            '<option value="">Select Student</option>';
+
+        students.forEach(student => {
+
+            const option = document.createElement("option");
+
+            option.value = student.id;
+            option.textContent = student.id + " - " + student.name;
+
+            studentSelect.appendChild(option);
+
+        });
+
+        if (students.length === 0) {
+            message.textContent =
+                "Please add students in Student Records first.";
+        }
+
+    }
+
+    function displayAttendance() {
+
+        attendanceList.innerHTML = "";
+
+        if (attendance.length === 0) {
+
+            attendanceList.innerHTML =
+                '<tr><td colspan="3">No attendance records yet.</td></tr>';
+
+        } else {
+
+            attendance.forEach(record => {
+
+                const row = document.createElement("tr");
+
+                [record.studentId, record.date, record.status]
+                    .forEach(value => {
+
+                        const cell = document.createElement("td");
+                        cell.textContent = value;
+                        row.appendChild(cell);
+
+                    });
+
+                attendanceList.appendChild(row);
+
+            });
+
+        }
+
+        displayPercentage();
+
+    }
+
+    function displayPercentage() {
+
+        percentageList.innerHTML = "";
+
+        if (students.length === 0) {
+            percentageList.innerHTML =
+                '<tr><td colspan="5">No students available.</td></tr>';
+            return;
+        }
+
+        students.forEach(student => {
+
+            const records = attendance.filter(
+                record => record.studentId === student.id
+            );
+
+            const total = records.length;
+
+            const present = records.filter(
+                record => record.status === "Present"
+            ).length;
+
+            const percentage = total === 0
+                ? 0
+                : (present / total * 100).toFixed(2);
+
+            const row = document.createElement("tr");
+
+            [
+                student.id,
+                student.name,
+                total,
+                present,
+                percentage + "%"
+            ].forEach(value => {
+
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                row.appendChild(cell);
+
+            });
+
+            percentageList.appendChild(row);
+
+        });
+
+    }
+
+    document.getElementById("attendanceForm")
+        .addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const studentId = studentSelect.value;
+            const date = document.getElementById("date").value;
+            const status = document.getElementById("status").value;
+
+            const existing = attendance.find(record =>
+                record.studentId === studentId &&
+                record.date === date
+            );
+
+            if (existing) {
+
+                message.textContent =
+                    "Attendance already recorded for this date!";
+
+                return;
+
+            }
+
+            attendance.push({
+                studentId: studentId,
+                date: date,
+                status: status
+            });
+
+            localStorage.setItem(
+                "attendxAttendance",
+                JSON.stringify(attendance)
+            );
+
+            message.textContent =
+                "Attendance submitted successfully!";
+
+            this.reset();
+
+            displayAttendance();
+
+        });
+
+    loadStudents();
+    displayAttendance();
+
+</script>
 
 </body>
 </html>
