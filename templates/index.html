@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Algorithm Explorer</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0b1020;
+            color: white;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 8%;
+            background: #151d33;
+        }
+
+        nav h2 {
+            color: #38d9c5;
+        }
+
+        nav div {
+            display: flex;
+            gap: 25px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            color: #38d9c5;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .hero h1 {
+            font-size: 45px;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 span {
+            color: #38d9c5;
+        }
+
+        .hero p {
+            color: #b8c2d9;
+            font-size: 18px;
+            line-height: 1.7;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 14px 30px;
+            background: #38d9c5;
+            color: #07111e;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #20bba9;
+            transform: translateY(-3px);
+        }
+
+        .cards {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            padding: 30px;
+        }
+
+        .card {
+            background: #151d33;
+            padding: 30px;
+            width: 260px;
+            border-radius: 15px;
+            border: 1px solid #293653;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: #38d9c5;
+        }
+
+        .card h3 {
+            color: #38d9c5;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #b8c2d9;
+            line-height: 1.6;
+        }
+
+        .card a {
+            display: inline-block;
+            margin-top: 20px;
+            color: #38d9c5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #8995ad;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            nav {
+                padding: 20px;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            nav div {
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <h2>AttendX</h2>
+
+        <div>
+            <a href="/">Home</a>
+            <a href="/students">Students</a>
+            <a href="/attendance">Attendance</a>
+            <a href="/explorer">Algorithms</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Student Attendance <span>Algorithm Explorer</span></h1>
+
+        <p>
+            Manage student attendance and discover how different
+            algorithms work through simple step-by-step explanations.
+        </p>
+
+        <a href="/explorer" class="btn">Explore Algorithms</a>
+    </section>
+
+    <section class="cards">
+
+        <div class="card">
+            <h3>01. Student Records</h3>
+            <p>Store and manage student information in one place.</p>
+            <a href="/students">Manage Students →</a>
+        </div>
+
+        <div class="card">
+            <h3>02. Attendance Tracking</h3>
+            <p>Record attendance and calculate student attendance percentages.</p>
+            <a href="/attendance">Track Attendance →</a>
+        </div>
+
+        <div class="card">
+            <h3>03. Algorithm Explorer</h3>
+            <p>Understand searching and sorting algorithms with examples.</p>
+            <a href="/explorer">Explore Algorithms →</a>
+        </div>
+
+    </section>
+
+    <footer>
+        Student Attendance Algorithm Explorer | 2026
+    </footer>
+
+</body>
+</html>

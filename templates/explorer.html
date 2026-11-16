@@ -1,0 +1,300 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Explorer - AttendX</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0b1020;
+            color: white;
+            padding: 30px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 35px;
+        }
+
+        h2, h3 {
+            color: #38d9c5;
+        }
+
+        a {
+            color: #38d9c5;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .box {
+            background: #151d33;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        p {
+            color: #b8c2d9;
+            line-height: 1.7;
+        }
+
+        label {
+            display: block;
+            margin: 18px 0 8px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 13px;
+            background: #0b1020;
+            color: white;
+            border: 1px solid #354361;
+            border-radius: 7px;
+        }
+
+        button {
+            margin-top: 22px;
+            padding: 13px 25px;
+            background: #38d9c5;
+            color: #07111e;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #354361;
+        }
+
+        th {
+            color: #38d9c5;
+        }
+
+        .steps {
+            margin-top: 15px;
+            padding-left: 25px;
+            color: #b8c2d9;
+            line-height: 2;
+        }
+
+        .complexity {
+            color: #38d9c5;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #151d33;
+            padding: 20px;
+            border: 1px solid #293653;
+            border-radius: 10px;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+        }
+
+        .note {
+            color: #f0c674;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>AttendX</h2>
+    <a href="/">← Back to Home</a>
+</header>
+
+<div class="container">
+
+    <h1>Algorithm Explorer</h1>
+    <p>Choose an algorithm and explore how it works on student records.</p>
+
+    <br>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Linear Search</h3>
+            <p>Checks records one by one.</p>
+            <p>Time: O(n)</p>
+        </div>
+
+        <div class="card">
+            <h3>Binary Search</h3>
+            <p>Searches sorted student IDs.</p>
+            <p>Time: O(log n)</p>
+        </div>
+
+        <div class="card">
+            <h3>Bubble Sort</h3>
+            <p>Compares neighboring percentages.</p>
+            <p>Time: O(n²)</p>
+        </div>
+
+        <div class="card">
+            <h3>Merge Sort</h3>
+            <p>Divides and merges records.</p>
+            <p>Time: O(n log n)</p>
+        </div>
+
+    </div>
+
+    <div class="box">
+
+        <h3>Run an Algorithm</h3>
+
+        <form method="POST">
+
+            <label>Select Algorithm</label>
+
+            <select name="algorithm" id="algorithm" required>
+                <option value="">Choose an algorithm</option>
+                <option value="linear">Linear Search</option>
+                <option value="binary">Binary Search</option>
+                <option value="bubble">Bubble Sort</option>
+                <option value="merge">Merge Sort</option>
+            </select>
+
+            <label>Student ID (only for searching)</label>
+
+            <input
+                type="text"
+                name="student_id"
+                id="student_id"
+                placeholder="Example: STU101"
+            >
+
+            <p class="note">
+                Enter a Student ID for Linear Search or Binary Search.
+                Sorting algorithms use all student records.
+            </p>
+
+            <button type="submit">Run Algorithm</button>
+
+        </form>
+
+    </div>
+
+    {% if result is not none %}
+
+    <div class="box">
+
+        <h3>Algorithm Result</h3>
+
+        <p class="complexity">{{ complexity }}</p>
+
+        {% if result is mapping %}
+
+            <h3 style="margin-top:20px;">Student Found!</h3>
+
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Attendance</th>
+                </tr>
+
+                <tr>
+                    <td>{{ result.id }}</td>
+                    <td>{{ result.name }}</td>
+                    <td>{{ result.department }}</td>
+                    <td>{{ result.percentage }}%</td>
+                </tr>
+            </table>
+
+        {% elif result is sequence and result is not string %}
+
+            <h3 style="margin-top:20px;">Sorted Student Records</h3>
+
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Attendance</th>
+                </tr>
+
+                {% for student in result %}
+                <tr>
+                    <td>{{ student.id }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.department }}</td>
+                    <td>{{ student.percentage }}%</td>
+                </tr>
+                {% endfor %}
+
+            </table>
+
+        {% else %}
+
+            <p>Student not found. Please check the Student ID.</p>
+
+        {% endif %}
+
+        <h3 style="margin-top:25px;">Step-by-Step Explanation</h3>
+
+        <ol class="steps">
+            {% for step in steps %}
+                <li>{{ step }}</li>
+            {% else %}
+                <li>No steps available.</li>
+            {% endfor %}
+        </ol>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+    const algorithm = document.getElementById("algorithm");
+    const studentId = document.getElementById("student_id");
+
+    function updateStudentId() {
+        studentId.required =
+            algorithm.value === "linear" ||
+            algorithm.value === "binary";
+    }
+
+    algorithm.addEventListener("change", updateStudentId);
+    updateStudentId();
+</script>
+
+</body>
+</html>

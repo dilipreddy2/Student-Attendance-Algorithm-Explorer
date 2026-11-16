@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Tracking - AttendX</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #0b1020;
+            color: white;
+            padding: 30px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+
+        header h2, h3 {
+            color: #38d9c5;
+        }
+
+        a {
+            color: #38d9c5;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .box {
+            background: #151d33;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 25px;
+        }
+
+        h1 {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            margin: 18px 0 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 13px;
+            background: #0b1020;
+            color: white;
+            border: 1px solid #354361;
+            border-radius: 7px;
+        }
+
+        button {
+            margin-top: 25px;
+            padding: 13px 25px;
+            background: #38d9c5;
+            border: none;
+            border-radius: 7px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .message {
+            color: #38d9c5;
+            margin-top: 15px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #354361;
+        }
+
+        th {
+            color: #38d9c5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h2>AttendX</h2>
+        <a href="/">← Back to Home</a>
+    </header>
+
+    <div class="container">
+
+        <h1>Attendance Tracking</h1>
+
+        <div class="box">
+
+            <h3>Mark Attendance</h3>
+
+            <form method="POST">
+
+                <label>Student ID</label>
+
+                <select name="student_id" required>
+                    <option value="">Select Student</option>
+
+                    {% for student in students %}
+                    <option value="{{ student['id'] }}">
+                        {{ student['id'] }} - {{ student['name'] }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+
+                <label>Date</label>
+                <input type="date" name="date" required>
+
+                <label>Attendance Status</label>
+
+                <select name="status" required>
+                    <option value="">Select Status</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                </select>
+
+                <button type="submit">Submit Attendance</button>
+
+            </form>
+
+            <p class="message">{{ message }}</p>
+
+            <h3 style="margin-top:30px;">Attendance Records</h3>
+
+            <table>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+
+                {% for record in records %}
+                <tr>
+                    <td>{{ record['student_id'] }}</td>
+                    <td>{{ record['date'] }}</td>
+                    <td>{{ record['status'] }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3">No attendance records yet.</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
